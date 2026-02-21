@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom — Your Fitness Journey</title>
+<meta name="description" content="A personal fitness tracker to help you lose weight, build confidence, and bloom into your best self."/>
+<meta name="theme-color" content="#f2a7b8"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Bloom"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --rose: #f2a7b8;
+    --rose-light: #fde8ed;
+    --peach: #f9c9a8;
+    --peach-light: #fef0e6;
+    --sage: #b5d5c5;
+    --sage-light: #e4f1eb;
+    --lavender: #c9b8e8;
+    --lavender-light: #ede8f9;
+    --cream: #fdf8f2;
+    --warm-white: #fffaf7;
+    --text-dark: #3d2c2c;
+    --text-mid: #7a5c5c;
+    --text-soft: #b89090;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG blobs */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #f9d5de88, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px; left: -80px;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, #b5d5c588, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: var(--rose);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .tagline {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    font-weight: 300;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* PROFILE BANNER */
+  .profile-banner {
+    background: white;
+    border-radius: 24px;
+    padding: 24px 28px;
+    margin: 24px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 30px #f2a7b818;
+    border: 1px solid #f9e8eb;
+  }
+  .avatar {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--rose), var(--lavender));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .profile-info h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text-dark);
+  }
+  .profile-info p {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--rose-light);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    color: var(--text-mid);
+    font-weight: 500;
+  }
+
+  /* CHALLENGE TIMELINE */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin: 28px 0 14px;
+  }
+
+  .challenge-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .challenge-strip::-webkit-scrollbar { display: none; }
+
+  .challenge-card {
+    flex-shrink: 0;
+    background: white;
+    border-radius: 18px;
+    padding: 16px 18px;
+    min-width: 110px;
+    text-align: center;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 2px 12px #00000008;
+  }
+  .challenge-card.active {
+    border-color: var(--rose);
+    background: var(--rose-light);
+  }
+  .challenge-card.completed {
+    background: var(--sage-light);
+    border-color: var(--sage);
+  }
+  .challenge-card .days {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--text-dark);
+  }
+  .challenge-card .label {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+  .challenge-card .badge {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  /* PROGRESS RING */
+  .progress-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media(max-width: 500px) {
+    .progress-section { grid-template-columns: 1fr; }
+  }
+
+  .ring-card {
+    background: white;
+    border-radius: 22px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 20px #00000008;
+    border: 1px solid #f5eded;
+  }
+  .ring-card h3 {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: 110px; height: 110px;
+  }
+  .ring-wrap svg {
+    transform: rotate(-90deg);
+    width: 110px; height: 110px;
+  }
+  .ring-bg { fill: none; stroke: #f5eded; stroke-width: 10; }
+  .ring-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .ring-center .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--text-dark);
+    line-height: 1;
+  }
+  .ring-center .unit {
+    font-size: 0.65rem;
+    color: var(--text-soft);
+  }
+  .ring-card .sub {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    text-align: center;
+  }
+
+  /* WEIGHT TRACKER */
+  .weight-card {
+    background: white;
+    border-radius: 22px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px #00000008;
+    border: 1px solid #f5eded;
+    margin-bottom: 14px;
+  }
+  .weight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .weight-goal {
+    text-align: right;
+  }
+  .weight-goal .target { font-size: 0.75rem; color: var(--text-soft); }
+  .weight-goal .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--sage);
+  }
+  .current-weight {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--text-dark);
+  }
+  .current-weight span { font-size: 1rem; color: var(--text-soft); }
+  .lost-badge {
+    display: inline-block;
+    background: var(--sage-light);
+    color: #4a8a6a;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  /* mini bar chart */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 60px;
+    margin-top: 10px;
+  }
+  .bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
+  .bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    transition: height 0.8s ease;
+    min-height: 4px;
+  }
+  .bar-label { font-size: 0.6rem; color: var(--text-soft); }
+
+  /* LOG INPUT */
+  .log-card {
+    background: white;
+    border-radius: 22px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px #00000008;
+    border: 1px solid #f5eded;
+    margin-bottom: 14px;
+  }
+  .log-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  @media(max-width: 500px) { .log-grid { grid-template-columns: 1fr; } }
+
+  .input-group label {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .input-group input, .input-group select {
+    width: 100%;
+    border: 1.5px solid #f0e8e8;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--warm-white);
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus, .input-group select:focus {
+    border-color: var(--rose);
+  }
+
+  .log-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--rose), #e8889e);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 15px #f2a7b840;
+  }
+  .log-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px #f2a7b855; }
+  .log-btn:active { transform: translateY(0); }
+
+  /* MEAL PLAN */
+  .meal-card {
+    background: white;
+    border-radius: 22px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px #00000008;
+    border: 1px solid #f5eded;
+    margin-bottom: 14px;
+  }
+  .meal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #faf0f0;
+  }
+  .meal-row:last-child { border-bottom: none; }
+  .meal-time {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    min-width: 55px;
+    padding-top: 2px;
+  }
+  .meal-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .meal-content h4 {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+  .meal-content p {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* MILESTONES */
+  .milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .milestone-item {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px #00000006;
+    border: 1px solid #f5eded;
+    transition: all 0.2s;
+  }
+  .milestone-item.done {
+    background: var(--sage-light);
+    border-color: var(--sage);
+  }
+  .milestone-icon {
+    font-size: 1.4rem;
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .milestone-item.done .milestone-icon { background: var(--sage); }
+  .milestone-item:not(.done) .milestone-icon { background: var(--rose-light); }
+  .milestone-text h4 {
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .milestone-text p {
+    font-size: 0.73rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+  .milestone-check {
+    margin-left: auto;
+    font-size: 1.1rem;
+  }
+
+  /* MOTIVATION QUOTE */
+  .quote-card {
+    background: linear-gradient(135deg, #fde8ed, #ede8f9);
+    border-radius: 22px;
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .quote-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    color: #f2a7b820;
+    line-height: 1;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    font-style: italic;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-refresh {
+    margin-top: 12px;
+    background: none;
+    border: 1.5px solid #f2a7b880;
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 0.75rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .quote-refresh:hover { background: white; }
+
+  /* TIPS */
+  .tips-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media(max-width: 500px) { .tips-row { grid-template-columns: 1fr; } }
+  .tip-card {
+    border-radius: 18px;
+    padding: 18px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .tip-card h4 { font-weight: 500; margin-bottom: 6px; font-size: 0.85rem; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #3d2c2c;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* FADE IN */
+  .fadein {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadein 0.6s forwards;
+  }
+  @keyframes fadein {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fadein:nth-child(2) { animation-delay: 0.1s; }
+  .fadein:nth-child(3) { animation-delay: 0.2s; }
+  .fadein:nth-child(4) { animation-delay: 0.3s; }
+  .fadein:nth-child(5) { animation-delay: 0.4s; }
+
+  /* History log */
+  .history-log {
+    margin-top: 14px;
+    max-height: 160px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .history-log::-webkit-scrollbar { display: none; }
+  .history-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #faf0f0;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+  }
+  .history-entry:last-child { border-bottom: none; }
+
+  /* Navigation dots for sections */
+  .nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #f0e8e8;
+    background: white;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-mid);
+    transition: all 0.2s;
+  }
+  .nav-tab.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: white;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo">🌸 bloom</div>
+    <div class="tagline">Your Personal Confidence Journey</div>
+  </header>
+
+  <!-- Profile -->
+  <div class="profile-banner fadein">
+    <div class="avatar">🌺</div>
+    <div class="profile-info">
+      <h2>Your Journey Starts Today</h2>
+      <p>February 22, 2026 · 90-Day Challenge</p>
+      <div class="stats-row">
+        <span class="stat-pill">17 yrs · 5'2"</span>
+        <span class="stat-pill">Start: 64kg</span>
+        <span class="stat-pill">Goal: 54kg</span>
+        <span class="stat-pill">Lily Sabri 🧘‍♀️</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('dashboard')">🏠 Dashboard</button>
+    <button class="nav-tab" onclick="showTab('log')">📝 Log Today</button>
+    <button class="nav-tab" onclick="showTab('meals')">🥗 Meal Plan</button>
+    <button class="nav-tab" onclick="showTab('milestones')">🏆 Milestones</button>
+    <button class="nav-tab" onclick="showTab('tips')">✨ Tips</button>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" class="section active">
+
+    <!-- Quote -->
+    <div class="quote-card fadein">
+      <div class="quote-text" id="quote-text">You are not a before photo. You are becoming the healthiest, happiest version of you — one beautiful day at a time.</div>
+      <button class="quote-refresh" onclick="refreshQuote()">✦ New Inspiration</button>
+    </div>
+
+    <!-- Challenge timeline -->
+    <div class="section-title">🎯 Challenge Timeline</div>
+    <div class="challenge-strip">
+      <div class="challenge-card active" onclick="selectChallenge(this, 7)">
+        <div class="badge">🌱</div>
+        <div class="days">7</div>
+        <div class="label">Day Spark</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 14)">
+        <div class="badge">🌿</div>
+        <div class="days">14</div>
+        <div class="label">Day Grow</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 21)">
+        <div class="badge">🌸</div>
+        <div class="days">21</div>
+        <div class="label">Day Habit</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 30)">
+        <div class="badge">🌺</div>
+        <div class="days">30</div>
+        <div class="label">Day Glow</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 45)">
+        <div class="badge">🦋</div>
+        <div class="days">45</div>
+        <div class="label">Day Transform</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 60)">
+        <div class="badge">⭐</div>
+        <div class="days">60</div>
+        <div class="label">Day Strong</div>
+      </div>
+      <div class="challenge-card" onclick="selectChallenge(this, 90)">
+        <div class="badge">👑</div>
+        <div class="days">90</div>
+        <div class="label">Day Queen</div>
+      </div>
+    </div>
+
+    <!-- Progress rings -->
+    <div class="section-title">📊 Today's Progress</div>
+    <div class="progress-section">
+      <div class="ring-card">
+        <h3>Steps Today</h3>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 110 110">
+            <circle class="ring-bg" cx="55" cy="55" r="45"/>
+            <circle class="ring-fill" id="steps-ring" cx="55" cy="55" r="45" stroke="#f2a7b8" style="stroke-dashoffset:200"/>
+          </svg>
+          <div class="ring-center">
+            <div class="val" id="steps-val">0</div>
+            <div class="unit">/ 7,000</div>
+          </div>
+        </div>
+        <div class="sub">Morning + school + evening walk 🚶‍♀️</div>
+      </div>
+
+      <div class="ring-card">
+        <h3>Water Intake</h3>
+        <div class="ring-wrap">
+          <svg viewBox="0 0 110 110">
+            <circle class="ring-bg" cx="55" cy="55" r="45"/>
+            <circle class="ring-fill" id="water-ring" cx="55" cy="55" r="45" stroke="#b5d5c5" style="stroke-dashoffset:150"/>
+          </svg>
+          <div class="ring-center">
+            <div class="val" id="water-val">0</div>
+            <div class="unit">ml / 2000</div>
+          </div>
+        </div>
+        <div class="sub">Start with 700ml warm water 💧</div>
+      </div>
+    </div>
+
+    <!-- Weight tracker -->
+    <div class="weight-card fadein">
+      <div class="weight-header">
+        <div>
+          <div style="font-size:0.75rem;color:var(--text-soft);margin-bottom:4px;">Current Weight</div>
+          <div class="current-weight" id="current-weight-disp">64.0 <span>kg</span></div>
+          <div class="lost-badge" id="lost-badge">🌱 Journey begins!</div>
+        </div>
+        <div class="weight-goal">
+          <div class="target">Goal</div>
+          <div class="num">54 kg</div>
+          <div style="font-size:0.7rem;color:var(--text-soft);">10 kg away</div>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-soft);margin-bottom:6px;">Weight History (kg)</div>
+      <div class="mini-chart" id="mini-chart">
+        <div class="bar-col"><div class="bar" style="background:var(--rose-light);height:60px"></div><div class="bar-label">Start</div></div>
+      </div>
+    </div>
+
+    <!-- Workout status -->
+    <div class="section-title">💪 Today's Workout</div>
+    <div class="ring-card" style="flex-direction:row;justify-content:space-between;padding:18px 22px;">
+      <div>
+        <div style="font-size:0.75rem;color:var(--text-soft);margin-bottom:4px;">Planned</div>
+        <div style="font-size:0.9rem;font-weight:500;" id="workout-text">Lily Sabri — Day 1/7 Challenge 🌱</div>
+        <div style="font-size:0.73rem;color:var(--text-soft);margin-top:4px;">Morning walk + abs pilates</div>
+      </div>
+      <button onclick="markWorkout()" id="workout-btn" style="background:var(--rose-light);border:none;border-radius:12px;padding:10px 16px;cursor:pointer;font-size:0.8rem;color:var(--text-mid);font-family:'DM Sans',sans-serif;white-space:nowrap;">Mark Done ✓</button>
+    </div>
+
+  </div>
+
+  <!-- LOG TAB -->
+  <div id="tab-log" class="section">
+    <div class="log-card">
+      <div class="section-title" style="margin-top:0">📝 Log Your Progress</div>
+
+      <div style="margin-top:4px;font-size:0.82rem;color:var(--text-soft);">Track today's stats to watch your bloom 🌸</div>
+
+      <div class="log-grid">
+        <div class="input-group">
+          <label>⚖️ Weight (kg)</label>
+          <input type="number" id="log-weight" placeholder="e.g. 63.5" step="0.1" min="40" max="100"/>
+        </div>
+        <div class="input-group">
+          <label>🚶 Steps taken</label>
+          <input type="number" id="log-steps" placeholder="e.g. 7500"/>
+        </div>
+        <div class="input-group">
+          <label>💧 Water (ml)</label>
+          <input type="number" id="log-water" placeholder="e.g. 1500"/>
+        </div>
+        <div class="input-group">
+          <label>😴 Sleep (hrs)</label>
+          <input type="number" id="log-sleep" placeholder="e.g. 8" step="0.5"/>
+        </div>
+        <div class="input-group">
+          <label>🧘 Workout</label>
+          <select id="log-workout">
+            <option value="">Select...</option>
+            <option>Lily Sabri — Abs Pilates</option>
+            <option>Lily Sabri — Full Body</option>
+            <option>Lily Sabri — Lose Fast</option>
+            <option>Morning Walk</option>
+            <option>Evening Walk</option>
+            <option>Both Walks</option>
+            <option>Rest Day</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>🥗 Ate healthy today?</label>
+          <select id="log-healthy">
+            <option value="">Select...</option>
+            <option>Yes, fully on track ✅</option>
+            <option>Mostly, small slip 🌿</option>
+            <option>Had some junk 🍕</option>
+            <option>Not my best day 🌱</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group" style="margin-top:12px;">
+        <label>💭 How are you feeling today?</label>
+        <input type="text" id="log-mood" placeholder="Energetic, tired, motivated... "/>
+      </div>
+
+      <button class="log-btn" onclick="saveLog()">✦ Save Today's Log</button>
+
+      <!-- History -->
+      <div style="margin-top:20px;font-size:0.82rem;font-weight:500;color:var(--text-mid);">Recent Entries</div>
+      <div class="history-log" id="history-log">
+        <div style="font-size:0.78rem;color:var(--text-soft);padding:12px 0;text-align:center;">No entries yet. Log your first day! 🌱</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEALS TAB -->
+  <div id="tab-meals" class="section">
+    <div class="meal-card">
+      <div class="section-title" style="margin-top:0">🥗 Your Daily Meal Plan</div>
+      <div style="font-size:0.8rem;color:var(--text-soft);margin-bottom:6px;">Approx. 1,200–1,400 kcal · Intermittent fasting window</div>
+
+      <div class="meal-row">
+        <div class="meal-time">7:00 AM</div>
+        <div class="meal-icon" style="background:var(--peach-light);">🌅</div>
+        <div class="meal-content">
+          <h4>Morning Ritual</h4>
+          <p>700ml warm water + 1 cup green tea (no sugar). Boosts metabolism and hydration for the day.</p>
+        </div>
+      </div>
+
+      <div class="meal-row">
+        <div class="meal-time">11:20 AM</div>
+        <div class="meal-icon" style="background:var(--sage-light);">🍚</div>
+        <div class="meal-content">
+          <h4>Lunch (Break Fast)</h4>
+          <p>Stir-fried vegetables (broccoli, onion, carrot, tomato) + protein (paneer / soya / chicken) + 1 cup cooked rice. ~600 kcal</p>
+        </div>
+      </div>
+
+      <div class="meal-row">
+        <div class="meal-time">3:30 PM</div>
+        <div class="meal-icon" style="background:var(--lavender-light);">🍌</div>
+        <div class="meal-content">
+          <h4>Snack / Second Meal</h4>
+          <p>Seasonal fruits (apple, papaya, orange, guava) OR sattu-banana shake (no sugar) + milk. ~350 kcal</p>
+        </div>
+      </div>
+
+      <div class="meal-row">
+        <div class="meal-time">After 4 PM</div>
+        <div class="meal-icon" style="background:var(--rose-light);">🚫</div>
+        <div class="meal-content">
+          <h4>Fasting Window</h4>
+          <p>Only water, green tea, or black coffee (no sugar). Keep the fast going for best results!</p>
+        </div>
+      </div>
+
+      <div style="margin-top:18px;padding:14px;background:var(--sage-light);border-radius:14px;">
+        <div style="font-size:0.8rem;font-weight:500;color:#3a7a5a;margin-bottom:6px;">💡 Protein Rotation Tip</div>
+        <div style="font-size:0.75rem;color:#4a8a6a;line-height:1.5;">Mon/Thu → Paneer · Tue/Fri → Chicken · Wed/Sat → Soya · Sun → Eggs or mix. Keeps meals exciting and nutrients balanced!</div>
+      </div>
+    </div>
+
+    <div class="meal-card">
+      <div class="section-title" style="margin-top:0">🥤 Sattu Banana Shake Recipe</div>
+      <div style="font-size:0.82rem;color:var(--text-mid);line-height:1.7;">
+        🥛 200ml milk (low fat)<br>
+        🍌 1 ripe banana<br>
+        🌾 2 tbsp sattu flour<br>
+        ❄️ Blend cold — no sugar needed!<br>
+        <span style="color:var(--text-soft);font-size:0.75rem;">~280 kcal · high protein · keeps you full</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MILESTONES TAB -->
+  <div id="tab-milestones" class="section">
+    <div class="section-title">🏆 Your Milestones</div>
+    <div class="milestone-list" id="milestone-list">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- TIPS TAB -->
+  <div id="tab-tips" class="section">
+    <div class="section-title">✨ Tips for You</div>
+    <div class="tips-row">
+      <div class="tip-card" style="background:var(--rose-light);">
+        <h4>📏 Feel Taller</h4>
+        Pilates naturally improves posture — stand tall, shoulders back. Stretching + 8–9hrs sleep is when your body grows most. Calcium-rich food (paneer!) helps too.
+      </div>
+      <div class="tip-card" style="background:var(--sage-light);">
+        <h4>🚶 Step It Up</h4>
+        Add a 20-min morning + 20-min evening walk to reach 10,000+ steps. Your school steps + walks = amazing calorie burn!
+      </div>
+      <div class="tip-card" style="background:var(--lavender-light);">
+        <h4>🍕 Junk Food Swap</h4>
+        Craving chips? Try makhana (foxnuts) or roasted chana. Sweet craving? Eat a banana or dates. These swaps satisfy without sabotage.
+      </div>
+      <div class="tip-card" style="background:var(--peach-light);">
+        <h4>💧 Hydration Hack</h4>
+        Drink 200ml water before each meal. It reduces hunger and helps digestion. Your 700ml morning water is already a superpower habit!
+      </div>
+      <div class="tip-card" style="background:var(--rose-light);">
+        <h4>😴 Sleep = Weight Loss</h4>
+        Poor sleep raises hunger hormones! Aim for 8–9 hrs. Growth hormone (which also helps height!) releases during deep sleep.
+      </div>
+      <div class="tip-card" style="background:var(--sage-light);">
+        <h4>🧘 Pilates Power</h4>
+        Lily Sabri's abs + full body routines improve core strength and burn fat. Consistency beats intensity — even 20 mins daily makes a huge difference!
+      </div>
+    </div>
+
+    <div class="quote-card" style="margin-top:14px;">
+      <div class="quote-text">Losing weight is not your life's work, and counting calories is not the call of your soul. You surely are meant to do much greater things.</div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Storage helpers
+  function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){} }
+  function load(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e){ return def; } }
+
+  // TABS
+  function showTab(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // QUOTES
+  const quotes = [
+    "You are not a before photo. You are becoming the healthiest, happiest version of you — one beautiful day at a time.",
+    "Confidence is not about being perfect. It is about showing up for yourself, every single day.",
+    "Every step you walk, every healthy meal you eat — that is love you are giving to your future self.",
+    "Progress is progress, no matter how small. You are blossoming at exactly the right pace.",
+    "Your body hears everything your mind says. Be kind, be patient, be proud.",
+    "The girl who decided to go for it — that is you. Every single morning.",
+    "Health is not a punishment. It is a gift you are choosing to give yourself.",
+    "Small changes, every day, create breathtaking transformations.",
+    "You don't have to be extreme, just consistent. Bloom at your own pace 🌸"
+  ];
+  let qIdx = 0;
+  function refreshQuote() {
+    qIdx = (qIdx + 1) % quotes.length;
+    document.getElementById('quote-text').style.opacity = 0;
+    setTimeout(() => {
+      document.getElementById('quote-text').textContent = quotes[qIdx];
+      document.getElementById('quote-text').style.opacity = 1;
+    }, 200);
+  }
+  document.getElementById('quote-text').style.transition = 'opacity 0.3s';
+
+  // CHALLENGE
+  function selectChallenge(el, days) {
+    document.querySelectorAll('.challenge-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('workout-text').textContent = `Lily Sabri — Day 1/${days} Challenge ${el.querySelector('.badge').textContent}`;
+    save('currentChallenge', days);
+    showToast(`${days}-Day Challenge started! You've got this 🌸`);
+  }
+
+  // WORKOUT
+  function markWorkout() {
+    const btn = document.getElementById('workout-btn');
+    btn.textContent = 'Completed ✓';
+    btn.style.background = 'var(--sage-light)';
+    btn.style.color = '#3a7a5a';
+    btn.disabled = true;
+    save('workoutDone_' + today(), true);
+    showToast('Amazing! Workout logged 💪');
+  }
+  function today() { return new Date().toISOString().slice(0,10); }
+
+  // RINGS
+  function setRing(id, val, max) {
+    const circ = 283;
+    const pct = Math.min(val / max, 1);
+    const offset = circ - pct * circ;
+    document.getElementById(id).style.strokeDashoffset = offset;
+  }
+
+  // WEIGHT DISPLAY
+  function updateWeightDisplay(logs) {
+    if (!logs.length) return;
+    const latest = logs[logs.length - 1];
+    const w = parseFloat(latest.weight || 64);
+    const lost = (64 - w).toFixed(1);
+    document.getElementById('current-weight-disp').innerHTML = `${w.toFixed(1)} <span>kg</span>`;
+    const badge = document.getElementById('lost-badge');
+    if (lost > 0) {
+      badge.textContent = `🌸 ${lost}kg lost — Keep going!`;
+      badge.style.background = 'var(--sage-light)';
+      badge.style.color = '#3a7a5a';
+    } else {
+      badge.textContent = '🌱 Journey begins!';
+    }
+    // mini chart
+    const chart = document.getElementById('mini-chart');
+    chart.innerHTML = '';
+    const all = [64, ...logs.filter(l=>l.weight).map(l=>parseFloat(l.weight))].slice(-7);
+    const minW = Math.min(...all) - 1;
+    const maxW = Math.max(...all) + 1;
+    all.forEach((w, i) => {
+      const h = ((w - minW) / (maxW - minW || 1)) * 55 + 5;
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `<div class="bar" style="background:${i===0?'var(--rose-light)':'var(--rose)'};height:${h}px;opacity:${0.4+i*0.1}"></div><div class="bar-label">${i===0?'Start':'W'+(i)}</div>`;
+      chart.appendChild(col);
+    });
+  }
+
+  // SAVE LOG
+  function saveLog() {
+    const w = document.getElementById('log-weight').value;
+    const steps = document.getElementById('log-steps').value;
+    const water = document.getElementById('log-water').value;
+    const sleep = document.getElementById('log-sleep').value;
+    const workout = document.getElementById('log-workout').value;
+    const healthy = document.getElementById('log-healthy').value;
+    const mood = document.getElementById('log-mood').value;
+    if (!w && !steps && !water) { showToast('Fill in at least weight, steps, or water 🌸'); return; }
+    const logs = load('logs', []);
+    const entry = { date: today(), weight: w, steps, water, sleep, workout, healthy, mood };
+    logs.push(entry);
+    save('logs', logs);
+    renderHistory(logs);
+    updateWeightDisplay(logs);
+    if (steps) { setRing('steps-ring', parseInt(steps), 7000); document.getElementById('steps-val').textContent = parseInt(steps).toLocaleString(); }
+    if (water) { setRing('water-ring', parseInt(water), 2000); document.getElementById('water-val').textContent = water; }
+    checkMilestones(logs);
+    showToast('Logged! Proud of you today 🌸');
+    // clear
+    ['log-weight','log-steps','log-water','log-sleep','log-mood'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('log-workout').value = '';
+    document.getElementById('log-healthy').value = '';
+  }
+
+  function renderHistory(logs) {
+    const el = document.getElementById('history-log');
+    if (!logs.length) { el.innerHTML = '<div style="font-size:0.78rem;color:var(--text-soft);padding:12px 0;text-align:center;">No entries yet. Log your first day! 🌱</div>'; return; }
+    el.innerHTML = [...logs].reverse().slice(0,10).map(l => `
+      <div class="history-entry">
+        <span>${l.date}</span>
+        <span>${l.weight ? l.weight+'kg' : '—'}</span>
+        <span>${l.steps ? l.steps+' steps' : '—'}</span>
+        <span>${l.workout || l.healthy || '—'}</span>
+      </div>
+    `).join('');
+  }
+
+  // MILESTONES
+  const milestoneData = [
+    { id:'start', icon:'🌱', title:'Journey Begins', desc:'Logged your first day — the hardest step!', check: (logs) => logs.length >= 1 },
+    { id:'7day', icon:'🌿', title:'7-Day Warrior', desc:'Completed your first 7-day challenge!', check: (logs) => logs.length >= 7 },
+    { id:'1kg', icon:'💪', title:'First Kilo Gone!', desc:'Lost your first kilogram — amazing progress!', check: (logs) => logs.some(l=>l.weight && parseFloat(l.weight) <= 63) },
+    { id:'steps', icon:'🚶', title:'Step Queen', desc:'Hit 10,000+ steps in a single day!', check: (logs) => logs.some(l=>parseInt(l.steps)>=10000) },
+    { id:'14day', icon:'🌸', title:'14-Day Glow', desc:'2 weeks of consistency — you\'re building habits!', check: (logs) => logs.length >= 14 },
+    { id:'5kg', icon:'⭐', title:'Halfway There!', desc:'Lost 5kg — you\'re blooming beautifully!', check: (logs) => logs.some(l=>l.weight && parseFloat(l.weight) <= 59) },
+    { id:'30day', icon:'🦋', title:'30-Day Transformation', desc:'A whole month of showing up for yourself!', check: (logs) => logs.length >= 30 },
+    { id:'goal', icon:'👑', title:'Goal Achieved!', desc:'Reached 54kg — you are incredible!', check: (logs) => logs.some(l=>l.weight && parseFloat(l.weight) <= 54) },
+  ];
+
+  function checkMilestones(logs) {
+    const achieved = load('achieved', {});
+    milestoneData.forEach(m => {
+      if (!achieved[m.id] && m.check(logs)) {
+        achieved[m.id] = true;
+        save('achieved', achieved);
+        showToast(`🎉 Milestone unlocked: ${m.title}!`);
+      }
+    });
+    renderMilestones(achieved);
+  }
+
+  function renderMilestones(achieved) {
+    const el = document.getElementById('milestone-list');
+    el.innerHTML = milestoneData.map(m => {
+      const done = achieved[m.id];
+      return `<div class="milestone-item ${done ? 'done' : ''}">
+        <div class="milestone-icon">${m.icon}</div>
+        <div class="milestone-text">
+          <h4>${m.title}</h4>
+          <p>${m.desc}</p>
+        </div>
+        <div class="milestone-check">${done ? '✅' : '🔒'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // INIT
+  function init() {
+    const logs = load('logs', []);
+    const achieved = load('achieved', {});
+    renderHistory(logs);
+    updateWeightDisplay(logs);
+    renderMilestones(achieved);
+    // restore rings from last entry
+    if (logs.length) {
+      const last = logs[logs.length-1];
+      if (last.date === today()) {
+        if (last.steps) { setRing('steps-ring', parseInt(last.steps), 7000); document.getElementById('steps-val').textContent = parseInt(last.steps).toLocaleString(); }
+        if (last.water) { setRing('water-ring', parseInt(last.water), 2000); document.getElementById('water-val').textContent = last.water; }
+      }
+    }
+    if (load('workoutDone_' + today(), false)) {
+      const btn = document.getElementById('workout-btn');
+      btn.textContent = 'Completed ✓';
+      btn.style.background = 'var(--sage-light)';
+      btn.style.color = '#3a7a5a';
+      btn.disabled = true;
+    }
+  }
+
+  init();
+
+  // Register service worker for PWA / offline support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('[Bloom] SW registered:', reg.scope))
+        .catch(err => console.warn('[Bloom] SW registration failed:', err));
+    });
+  }
+</script>
+</body>
+</html>
